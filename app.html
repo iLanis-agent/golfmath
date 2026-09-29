@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GolfMath - calculator</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0f1a13; color: #ecf4ee; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+  main { max-width: 740px; padding: 32px 20px 48px; width: 100%; box-sizing: border-box; }
+  h1 { font-size: 1.9rem; margin: 0 0 4px; }
+  p.sub { color: #b6c9bd; margin: 0 0 20px; }
+  .card { background: #152219; border: 1px solid #2a4032; border-radius: 12px; padding: 18px 20px; margin-bottom: 16px; }
+  .card h2 { margin: 0 0 12px; font-size: 1.05rem; color: #cde3d4; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; }
+  label { display: block; color: #9fb4a6; font-size: 0.82rem; margin-bottom: 4px; }
+  input, select, textarea { width: 100%; box-sizing: border-box; background: #0f1a13; border: 1px solid #35513f; color: #ecf4ee; border-radius: 8px; padding: 9px 10px; font-size: 0.95rem; }
+  textarea { min-height: 74px; font-family: inherit; }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .presets button { background: #1d3125; color: #d8e8dd; border: 1px solid #35513f; border-radius: 999px; padding: 7px 14px; font-size: 0.85rem; cursor: pointer; }
+  .presets button:hover { background: #2a4032; }
+  .out { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .metric { background: #0f1a13; border: 1px solid #2a4032; border-radius: 10px; padding: 12px 14px; }
+  .metric .v { font-size: 1.3rem; font-weight: 700; color: #7fd49b; }
+  .metric .k { color: #9fb4a6; font-size: 0.78rem; margin-top: 2px; }
+  .note { color: #7e9184; font-size: 0.82rem; line-height: 1.5; margin-top: 10px; }
+  a.back { color: #7fd49b; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>&#9971; GolfMath</h1>
+  <p class="sub">Handicap arithmetic by the actual rule book.</p>
+  <div class="presets">
+    <button data-p="mid">Mid handicapper</button>
+    <button data-p="new">Three rounds in</button>
+    <button data-p="plus">Plus handicap</button>
+    <button data-p="buddy">Buddy check</button>
+  </div>
+  <div class="card">
+    <h2>1. Score differential (one round)</h2>
+    <div class="grid">
+      <div><label>Adjusted gross score</label><input id="gross" type="number" value="85" min="50" max="150"></div>
+      <div><label>Course rating</label><input id="rating" type="number" value="71.2" step="0.1" min="55" max="80"></div>
+      <div><label>Slope rating</label><input id="slope" type="number" value="128" min="55" max="155"></div>
+      <div><label>PCC adjustment (-1 to 3)</label><input id="pcc" type="number" value="0" min="-1" max="3"></div>
+    </div>
+    <div class="out" style="margin-top:12px">
+      <div class="metric"><div class="v" id="o-diff">-</div><div class="k">Score differential</div></div>
+      <div class="metric"><div class="v" id="o-max">-</div><div class="k">Max postable on a hole (net double bogey)</div></div>
+    </div>
+    <div class="grid" style="margin-top:12px">
+      <div><label>Hole par (for the max)</label><input id="holePar" type="number" value="4" min="3" max="5"></div>
+      <div><label>Hole stroke index 1-18 (for the max)</label><input id="holeSi" type="number" value="5" min="1" max="18"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>2. Handicap index (your scoring record)</h2>
+    <label>Differentials, most recent first, comma-separated (3 or more)</label>
+    <textarea id="diffs">12.2, 14.0, 11.5, 16.3, 13.1, 15.2, 12.8, 17.0, 14.4, 13.9, 11.9, 15.8, 12.2, 14.7, 13.3, 16.0, 12.9, 15.5, 13.8, 14.1</textarea>
+    <div class="out" style="margin-top:12px">
+      <div class="metric"><div class="v" id="o-index">-</div><div class="k">Handicap index</div></div>
+      <div class="metric"><div class="v" id="o-indexused">-</div><div class="k">How it was computed</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>3. Course and playing handicap (the tees today)</h2>
+    <div class="grid">
+      <div><label>Slope (these tees)</label><input id="tSlope" type="number" value="128" min="55" max="155"></div>
+      <div><label>Course rating (these tees)</label><input id="tRating" type="number" value="71.2" step="0.1"></div>
+      <div><label>Par (these tees)</label><input id="tPar" type="number" value="72" min="60" max="75"></div>
+      <div><label>Format allowance</label><select id="allow">
+        <option value="95" selected>Individual stroke play - 95%</option>
+        <option value="100">Individual match play - 100%</option>
+        <option value="85">Fourball better ball - 85%</option>
+        <option value="50">Foursomes - 50%</option>
+      </select></div>
+    </div>
+    <div class="out" style="margin-top:12px">
+      <div class="metric"><div class="v" id="o-ch">-</div><div class="k">Course handicap</div></div>
+      <div class="metric"><div class="v" id="o-ph">-</div><div class="k">Playing handicap</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>4. Honesty check</h2>
+    <div class="grid">
+      <div><label>Claimed index (yours, or theirs)</label><input id="claimed" type="number" value="11.0" step="0.1"></div>
+    </div>
+    <div class="out" style="margin-top:12px">
+      <div class="metric"><div class="v" id="o-gap">-</div><div class="k">Claimed minus computed</div></div>
+      <div class="metric"><div class="v" id="o-verdict">-</div><div class="k">Verdict</div></div>
+    </div>
+    <p class="note" id="o-note"></p>
+  </div>
+  <p class="note">Formulas per the R&amp;A/USGA Rules of Handicapping. The maximum index is 54.0. Nine-hole scores belong in your record too - post them and your association scales them; enter the resulting differential here.</p>
+  <p><a class="back" href="index.html">&larr; Back to GolfMath</a></p>
+</main>
+<script src="engine.js"></script>
+<script>
+(function () {
+  var ids = ['gross','rating','slope','pcc','holePar','holeSi','diffs','tSlope','tRating','tPar','allow','claimed'];
+  function num(id) { var v = parseFloat(document.getElementById(id).value); return isFinite(v) ? v : 0; }
+  function compute() {
+    if (typeof GolfMath === 'undefined') return;
+    var diff = GolfMath.scoreDifferential(num('gross'), num('rating'), num('slope'), num('pcc'));
+    document.getElementById('o-diff').textContent = diff.toFixed(1);
+
+    var raw = document.getElementById('diffs').value.split(',').map(function (s) { return parseFloat(s.trim()); }).filter(function (v) { return isFinite(v); });
+    var ix = GolfMath.indexFromDifferentials(raw);
+    var index = ix ? ix.index : 0;
+    document.getElementById('o-index').textContent = ix ? ix.index.toFixed(1) : 'need 3+';
+    document.getElementById('o-indexused').textContent = ix
+      ? 'lowest ' + ix.used.length + ' of ' + ix.windowCount + (ix.adjustment ? ', adj ' + ix.adjustment.toFixed(1) : '') + (ix.capped ? ', capped' : '')
+      : '-';
+
+    var ch = GolfMath.courseHandicap(index, num('tSlope'), num('tRating'), num('tPar'));
+    var ph = GolfMath.playingHandicap(ch, num('allow'));
+    document.getElementById('o-ch').textContent = ch;
+    document.getElementById('o-ph').textContent = ph;
+
+    var strokes = GolfMath.strokesReceived(ch, Math.round(num('holeSi')));
+    document.getElementById('o-max').textContent = GolfMath.maxHoleScore(Math.round(num('holePar')), strokes) +
+      ' (par ' + Math.round(num('holePar')) + ', ' + strokes + ' stroke' + (strokes === 1 ? '' : 's') + ')';
+
+    var h = GolfMath.honestyVerdict(num('claimed'), index);
+    document.getElementById('o-gap').textContent = (h.gap > 0 ? '+' : '') + h.gap.toFixed(1);
+    document.getElementById('o-verdict').textContent = h.verdict;
+    document.getElementById('o-note').textContent = ix
+      ? 'Your record holds ' + ix.recordCount + ' differentials; the window uses the most recent ' + ix.windowCount + '. A differential today: ' + diff.toFixed(1) + '.'
+      : 'Post at least three 54-hole-equivalent rounds and the index can be computed.';
+  }
+  var presets = {
+    mid: {gross:85, rating:71.2, slope:128, pcc:0, holePar:4, holeSi:5, diffs:'12.2, 14.0, 11.5, 16.3, 13.1, 15.2, 12.8, 17.0, 14.4, 13.9, 11.9, 15.8, 12.2, 14.7, 13.3, 16.0, 12.9, 15.5, 13.8, 14.1', tSlope:128, tRating:71.2, tPar:72, allow:'95', claimed:11.0},
+    new: {gross:98, rating:70.4, slope:120, pcc:0, holePar:4, holeSi:9, diffs:'26.3, 24.8, 28.1', tSlope:120, tRating:70.4, tPar:71, allow:'95', claimed:28.0},
+    plus: {gross:69, rating:72.8, slope:135, pcc:0, holePar:4, holeSi:17, diffs:'-1.2, 0.8, -2.0, 1.5, 0.2, -0.5, 1.0, -1.8, 0.6, -0.9, 1.2, -1.0, 0.4, -0.2, 1.8, -1.5, 0.9, -0.7, 1.1, -0.4', tSlope:135, tRating:72.8, tPar:72, allow:'100', claimed:0.5},
+    buddy: {gross:92, rating:70.0, slope:122, pcc:0, holePar:5, holeSi:2, diffs:'21.5, 19.8, 22.4, 20.6, 23.1, 21.0, 19.2, 22.8, 20.9, 21.7', tSlope:122, tRating:70.0, tPar:70, allow:'95', claimed:12.5}
+  };
+  Array.prototype.forEach.call(document.querySelectorAll('.presets button'), function (b) {
+    b.addEventListener('click', function () {
+      var p = presets[b.getAttribute('data-p')];
+      if (!p) return;
+      Object.keys(p).forEach(function (k) { document.getElementById(k).value = p[k]; });
+      compute();
+    });
+  });
+  ids.forEach(function (id) {
+    document.getElementById(id).addEventListener('input', compute);
+    document.getElementById(id).addEventListener('change', compute);
+  });
+  compute();
+})();
+</script>
+</body>
+</html>
