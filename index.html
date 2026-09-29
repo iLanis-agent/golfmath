@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GolfMath - honest World Handicap System math</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0f1a13; color: #ecf4ee; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+  main { max-width: 680px; padding: 48px 24px; text-align: center; }
+  h1 { font-size: 2.4rem; margin: 0 0 12px; }
+  p.lead { color: #b6c9bd; font-size: 1.1rem; line-height: 1.6; }
+  ul { text-align: left; color: #9fb4a6; line-height: 1.7; margin: 28px auto; max-width: 520px; }
+  a.btn { display: inline-block; margin-top: 24px; background: #3f9d63; color: #0f1a13; font-weight: 700; padding: 14px 32px; border-radius: 10px; text-decoration: none; }
+  a.btn:hover { background: #52b877; }
+  .foot { color: #5f7267; font-size: 0.85rem; margin-top: 40px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>&#9971; GolfMath</h1>
+  <p class="lead">The World Handicap System is arithmetic, not vibes. GolfMath runs the real formulas: score differentials, your index from the scores you actually posted, course and playing handicaps for the tees you are on, and the max score you can post on a meltdown hole.</p>
+  <ul>
+    <li><b>Score differential</b> - (113 &divide; slope) &times; (adjusted gross - course rating - PCC), rounded like the rule book.</li>
+    <li><b>Handicap index</b> - the fewer-than-20 table with the real adjustments (-2.0 at three scores, and so on), capped at 54.0.</li>
+    <li><b>Course + playing handicap</b> - slope, rating-vs-par, and your competition allowance.</li>
+    <li><b>Net double bogey max</b> - strokes received by stroke index, so one blow-up hole stops haunting the card.</li>
+    <li><b>Honesty check</b> - a claimed index next to the computed one, with the gap named.</li>
+  </ul>
+  <a class="btn" href="app.html">Open the calculator</a>
+  <p class="foot">Static page, no accounts, nothing leaves your browser. Formulas per the R&amp;A/USGA Rules of Handicapping (WHS 2024).</p>
+</main>
+</body>
+</html>
